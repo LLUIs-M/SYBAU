@@ -1,0 +1,6 @@
+flask
+flask-cors
+requests
+PyMuPDF
+openai-whisper
+imageio_ffmpeg

@@ -1,3 +1,11 @@
 ffmpeg.exe
 __pycache__/
 *.pyc
+*.py[cod]
+venv/
+env/
+.env
+node_modules/
+dist/
+.DS_Store
+.env.local
