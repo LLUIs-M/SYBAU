@@ -14,23 +14,38 @@ def chat():
     
     def generate():
         try:
-            # THE OVERRIDE: We hit the raw engine port directly. No middlemen.
             url = 'http://127.0.0.1:11434/api/chat'
             payload = {
                 "model": data.get('model', 'deepseek-r1:8b'),
-                "messages": data.get('messages', [])
+                "messages": data.get('messages', []),
+                "think": True
             }
-            
-            # stream=True rips the data out of the port packet-by-packet
+
+            in_thinking = False
+
             with requests.post(url, json=payload, stream=True) as r:
                 for line in r.iter_lines():
                     if line:
-                        # Decode the raw JSON machine code and extract just the text
                         chunk = json.loads(line)
-                        content = chunk.get('message', {}).get('content', '')
+                        msg = chunk.get('message', {})
+                        thinking = msg.get('thinking', '')
+                        content = msg.get('content', '')
+
+                        if thinking:
+                            if not in_thinking:
+                                yield '<think>'.encode('utf-8')
+                                in_thinking = True
+                            yield thinking.encode('utf-8')
+
                         if content:
+                            if in_thinking:
+                                yield '</think>'.encode('utf-8')
+                                in_thinking = False
                             yield content.encode('utf-8')
-                            
+
+            if in_thinking:
+                yield '</think>'.encode('utf-8')
+
         except Exception as e:
             print(f"Engine Error: {e}")
             yield f"\n\nSystem Error: {e}".encode('utf-8')
