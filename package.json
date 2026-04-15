@@ -1,0 +1,25 @@
+{
+  "name": "sybau",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev:front": "cd frontend && npm run dev",
+    "dev:back": "node scripts/dev-backend.js",
+    "dev": "concurrently \"npm run dev:back\" \"npm run dev:front\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/M4rio1/SYBAU.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/M4rio1/SYBAU/issues"
+  },
+  "homepage": "https://github.com/M4rio1/SYBAU#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, Response, stream_with_context
+from flask import Flask, request, Response, stream_with_context
+from flask_cors import CORS
 import requests
 import json
 import base64
@@ -7,15 +8,15 @@ import os
 import tempfile
 import whisper
 import imageio_ffmpeg
-
-# INJECT FFMPEG SECRETLY FOR WINDOWS WHISPER
 import shutil
+
+# INJECT FFMPEG FOR WHISPER
 ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
 local_ffmpeg = os.path.join(os.getcwd(), 'ffmpeg.exe')
 if not os.path.exists(local_ffmpeg):
     try:
         shutil.copy(ffmpeg_path, local_ffmpeg)
-    except:
+    except Exception:
         pass
 os.environ["PATH"] += os.pathsep + os.getcwd()
 
@@ -25,10 +26,8 @@ whisper_model = whisper.load_model("tiny")
 print("Whisper operational.")
 
 app = Flask(__name__)
+CORS(app)
 
-@app.route('/')
-def index():
-    return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -39,9 +38,9 @@ def chat():
     else:
         model_name = request.form.get('model', 'deepseek-r1:8b')
         user_text = request.form.get('text', '')
-        
+
         message_obj = {"role": "user", "content": user_text}
-        
+
         files = request.files.getlist('file')
         for file in files:
             if file and file.filename:
@@ -61,28 +60,24 @@ def chat():
                         message_obj["images"] = []
                     message_obj["images"].append(img_encoded)
                 elif filename.endswith(('.mp3', '.wav', '.ogg', '.m4a')):
-                    # 1. Save audio to a temp file because Whisper requires a physical file path
                     ext = os.path.splitext(filename)[1]
                     with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as temp_audio:
                         temp_audio.write(file.read())
                         temp_path = temp_audio.name
-                        
-                    # 2. Transcribe offline using Whisper
+
                     print(f"Transcribing audio from {filename}...")
                     result = whisper_model.transcribe(temp_path, fp16=False)
                     transcription = result["text"].strip()
-                    
-                    # 3. Clean up the temp file
+
                     try:
                         os.remove(temp_path)
-                    except:
+                    except Exception:
                         pass
-                    
-                    # 4. Inject transcript into LLM context
+
                     message_obj["content"] += f"\n\n[Attached Audio Transcript ({filename}):]\n{transcription}"
-                
+
         messages = [message_obj]
-    
+
     def generate():
         try:
             url = 'http://127.0.0.1:11434/api/chat'
@@ -99,7 +94,7 @@ def chat():
                     if line:
                         chunk = json.loads(line)
                         if 'error' in chunk:
-                            yield f"<br><br><b style='color: #f44336;'>Ollama API Error:</b> {chunk['error']}".encode('utf-8')
+                            yield f"[Ollama Error]: {chunk['error']}".encode('utf-8')
                             break
 
                         msg = chunk.get('message', {})
@@ -123,9 +118,8 @@ def chat():
 
         except Exception as e:
             print(f"Engine Error: {e}")
-            yield f"\n\nSystem Error: {e}".encode('utf-8')
+            yield f"\n\n[System Error]: {e}".encode('utf-8')
 
-    # THE ANTI-BUFFER SHIELD: These headers forbid Windows and Web Browsers from holding the data
     headers = {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
@@ -133,6 +127,7 @@ def chat():
     }
 
     return Response(stream_with_context(generate()), headers=headers)
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, threaded=True)
