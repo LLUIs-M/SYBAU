@@ -90,7 +90,7 @@ export default function Composer({
             {files.map((f, i) => (
               <div
                 key={i}
-                className="flex items-center gap-1.5 bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-zinc-700 dark:text-zinc-300"
+                className="flex items-center gap-1.5 bg-zinc-100 dark:bg-white/8 border border-zinc-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-zinc-700 dark:text-zinc-300"
               >
                 <svg
                   width="11"
@@ -99,14 +99,14 @@ export default function Composer({
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"
-                  className="text-zinc-400 dark:text-zinc-500"
+                  className="text-zinc-500 dark:text-zinc-400"
                 >
                   <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
                 </svg>
                 <span className="max-w-[140px] truncate">{f.name}</span>
                 <button
                   onClick={() => removeFile(i)}
-                  className="text-zinc-500 dark:text-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors ml-0.5 leading-none"
+                  className="text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors ml-0.5 leading-none"
                 >
                   ×
                 </button>
@@ -127,9 +127,9 @@ export default function Composer({
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={isGenerating || disabled}
-            placeholder="Message SYBAU…  (Shift + Enter for newline)"
+            placeholder="Ask SYBAU anything..."
             rows={1}
-            className="w-full bg-transparent text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-600 px-4 pt-3.5 pb-2 outline-none resize-none leading-relaxed disabled:opacity-40"
+            className="w-full bg-transparent text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400 px-4 pt-3.5 pb-2 outline-none resize-none leading-relaxed disabled:opacity-40"
           />
 
           <div className="flex items-center justify-between px-3 pb-3 pt-1">
@@ -138,7 +138,7 @@ export default function Composer({
               {/* Attach file */}
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-10 h-10 flex items-center justify-center rounded-lg text-zinc-400 dark:text-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/8 transition-colors cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/8 transition-colors cursor-pointer"
                 title="Attach file"
                 disabled={disabled}
               >
@@ -161,7 +161,7 @@ export default function Composer({
                   className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors ${
                     isRecording
                       ? "text-red-600 bg-red-500/10 border border-red-500/20 animate-pulse cursor-pointer"
-                      : "text-zinc-400 dark:text-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-white/8 cursor-pointer"
+                      : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/8 cursor-pointer"
                   }`}
                   title={isRecording ? "Stop recording" : "Voice input"}
                 >
@@ -213,7 +213,7 @@ export default function Composer({
                   ? "bg-red-500/15 text-red-500 hover:bg-red-500/25 border border-red-500/25 cursor-pointer"
                   : canSend
                     ? "bg-black hover:bg-black/80 dark:bg-white dark:hover:bg-white/80 dark:text-black text-white shadow-sm shadow-black/20 cursor-pointer"
-                    : "bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-700 cursor-not-allowed"
+                    : "bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
               }`}
               title={isGenerating ? "Stop generation" : "Send message"}
             >
@@ -240,7 +240,7 @@ export default function Composer({
           </div>
         </HoverBorderGradient>
 
-        <p className="text-center text-[10px] text-zinc-400 dark:text-zinc-700 mt-2.5">
+        <p className="text-center text-[10px] text-zinc-500 dark:text-zinc-500 mt-2.5">
           SYBAU runs locally — your conversations never leave your device.
         </p>
       </div>

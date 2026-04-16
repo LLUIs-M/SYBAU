@@ -2,6 +2,7 @@ import { useRef, useEffect } from "react";
 import type { Conversation } from "../types";
 import MessageItem from "./Message";
 import Spline from "@splinetool/react-spline";
+import { getModelIcon } from "../utils/modelIcons";
 
 interface Props {
   conversation: Conversation | null;
@@ -40,7 +41,7 @@ export default function ChatPane({ conversation, isStreaming }: Props) {
           <h2 className="text-5xl font-light bg-linear-to-b from-slate-900 to-slate-600 dark:text-white mb-1 bg-clip-text text-transparent">
             SYBAU
           </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-600 leading-relaxed max-w-md">
+          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-md">
             Local AI, private by design.
             <br />
             {conversation
@@ -65,12 +66,20 @@ export default function ChatPane({ conversation, isStreaming }: Props) {
           !conversation.messages.at(-1)?.content &&
           !conversation.messages.at(-1)?.thinking && (
             <div className="flex gap-3">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
-                S
-              </div>
+              {getModelIcon(conversation.model) ? (
+                <img
+                  src={getModelIcon(conversation.model)!}
+                  alt=""
+                  className="w-7 h-7 object-contain shrink-0"
+                />
+              ) : (
+                <div className="w-7 h-7 rounded-lg bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shrink-0">
+                  S
+                </div>
+              )}
               <div className="flex items-center gap-1 pt-2">
                 <span
-                  className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-600 animate-bounce"
+                  className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce"
                   style={{ animationDelay: "0ms" }}
                 />
                 <span

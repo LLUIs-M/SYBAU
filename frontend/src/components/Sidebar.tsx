@@ -50,13 +50,13 @@ export default function Sidebar({
           <span className="font-semibold text-zinc-900 dark:text-white text-sm tracking-wide">
             SYBAU
           </span>
-          <span className="text-[9px] text-zinc-500 dark:text-zinc-600 uppercase tracking-widest font-medium leading-none bg-zinc-200 dark:bg-white/5 px-1.5 py-0.5 rounded-full border border-zinc-300 dark:border-white/[0.06]">
+          <span className="text-[9px] text-zinc-600 dark:text-zinc-400 uppercase tracking-widest font-medium leading-none bg-zinc-200 dark:bg-white/8 px-1.5 py-0.5 rounded-full border border-zinc-300 dark:border-white/10">
             Offline
           </span>
         </div>
         <button
           onClick={onNew}
-          className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-white/8 text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+          className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-white/8 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
           title="New conversation"
         >
           <svg
@@ -83,7 +83,7 @@ export default function Sidebar({
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
-            className="text-zinc-400 dark:text-zinc-600 shrink-0"
+            className="text-zinc-500 dark:text-zinc-400 shrink-0"
           >
             <circle cx="11" cy="11" r="8" />
             <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -93,7 +93,7 @@ export default function Sidebar({
             placeholder="Search conversations…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-transparent text-xs text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 outline-none w-full"
+            className="bg-transparent text-xs text-zinc-900 dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 outline-none w-full"
           />
         </div>
       </div>
@@ -102,7 +102,7 @@ export default function Sidebar({
       <div className="flex-1 overflow-y-auto px-2 pb-2">
         {conversations.length === 0 && (
           <div className="text-center py-12 px-4">
-            <p className="text-xs text-zinc-500 dark:text-zinc-600 leading-relaxed">
+            <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
               No conversations yet.
               <br />
               Start a new chat above.
@@ -111,14 +111,14 @@ export default function Sidebar({
         )}
 
         {filtered.length === 0 && conversations.length > 0 && (
-          <p className="text-xs text-zinc-500 dark:text-zinc-600 text-center py-6">
+          <p className="text-xs text-zinc-600 dark:text-zinc-400 text-center py-6">
             No results found.
           </p>
         )}
 
         {GROUP_ORDER.filter((g) => groups[g]?.length).map((group) => (
           <div key={group} className="mb-1">
-            <p className="text-[10px] text-zinc-500 dark:text-zinc-600 uppercase tracking-widest font-medium px-2 pt-4 pb-1.5">
+            <p className="text-[10px] text-zinc-500 dark:text-zinc-400 uppercase tracking-widest font-medium px-2 pt-4 pb-1.5">
               {group}
             </p>
             {groups[group].map((conv) => (
@@ -184,7 +184,7 @@ export default function Sidebar({
             )}
           </span>
         </button>
-        <p className="text-[10px] text-zinc-500 dark:text-zinc-700 text-center">
+        <p className="text-[10px] text-zinc-500 dark:text-zinc-500 text-center">
           Local LLMs · Powered by Ollama
         </p>
       </div>

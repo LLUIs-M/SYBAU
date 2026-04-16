@@ -56,7 +56,7 @@ export default function ConversationRow({ conversation, isActive, onSelect, onDe
         <div className="flex-1 min-w-0">
           <p className="text-xs truncate">{conversation.title}</p>
           {conversation.preview && (
-            <p className="text-[10px] truncate text-zinc-500 dark:text-zinc-600 mt-0.5">{conversation.preview}</p>
+            <p className="text-[10px] truncate text-zinc-500 dark:text-zinc-400 mt-0.5">{conversation.preview}</p>
           )}
         </div>
       )}
@@ -73,7 +73,7 @@ export default function ConversationRow({ conversation, isActive, onSelect, onDe
               setEditTitle(conversation.title)
               setTimeout(() => inputRef.current?.focus(), 0)
             }}
-            className="p-1 rounded-md hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-400 dark:text-zinc-600 hover:text-zinc-800 dark:hover:text-zinc-300 transition-colors"
+            className="p-1 rounded-md hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
             title="Rename"
           >
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -83,7 +83,7 @@ export default function ConversationRow({ conversation, isActive, onSelect, onDe
           </button>
           <button
             onClick={onDelete}
-            className="p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-500/10 text-zinc-400 dark:text-zinc-600 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+            className="p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-500/10 text-zinc-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
             title="Delete"
           >
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

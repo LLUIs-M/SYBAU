@@ -2,6 +2,7 @@ import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { Message } from '../types'
+import { getModelIcon } from '../utils/modelIcons'
 
 interface Props {
   message: Message
@@ -36,7 +37,7 @@ export default function MessageItem({ message }: Props) {
                 {message.files.map((f) => (
                   <span
                     key={f}
-                    className="text-[11px] bg-white dark:bg-white/5 text-zinc-600 dark:text-zinc-500 px-2 py-0.5 rounded-md border border-zinc-200 dark:border-white/8"
+                    className="text-[11px] bg-white dark:bg-white/8 text-zinc-600 dark:text-zinc-400 px-2 py-0.5 rounded-md border border-zinc-200 dark:border-white/10"
                   >
                     📎 {f}
                   </span>
@@ -53,9 +54,17 @@ export default function MessageItem({ message }: Props) {
   return (
     <div className="flex gap-3">
       {/* Avatar */}
-      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shrink-0 mt-0.5">
-        S
-      </div>
+      {getModelIcon(message.model) ? (
+        <img
+          src={getModelIcon(message.model)!}
+          alt=""
+          className="w-7 h-7 object-contain shrink-0 mt-0.5"
+        />
+      ) : (
+        <div className="w-7 h-7 rounded-lg bg-linear-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shrink-0 mt-0.5">
+          S
+        </div>
+      )}
 
       <div className="flex-1 min-w-0">
         {/* Header row: model name + TTS */}
@@ -65,7 +74,7 @@ export default function MessageItem({ message }: Props) {
           </span>
           <button
             onClick={handleTts}
-            className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/5 hover:bg-zinc-200 dark:hover:bg-white/10 border border-zinc-200 dark:border-white/8 text-zinc-500 dark:text-zinc-600 hover:text-zinc-800 dark:hover:text-zinc-300 transition-colors"
+            className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/8 hover:bg-zinc-200 dark:hover:bg-white/10 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors"
             title="Read aloud"
           >
             {ttsPlaying ? (
@@ -96,7 +105,7 @@ export default function MessageItem({ message }: Props) {
             onToggle={(e) => setThinkOpen((e.target as HTMLDetailsElement).open)}
             className="mb-3 rounded-xl bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/8 overflow-hidden"
           >
-            <summary className="cursor-pointer select-none px-3 py-2.5 text-xs font-medium text-zinc-500 dark:text-zinc-600 hover:text-zinc-700 dark:hover:text-zinc-400 transition-colors flex items-center gap-2 list-none">
+            <summary className="cursor-pointer select-none px-3 py-2.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 transition-colors flex items-center gap-2 list-none">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
@@ -105,14 +114,14 @@ export default function MessageItem({ message }: Props) {
               Internal Logic
               {!message.thinkingDone && (
                 <span className="inline-flex gap-0.5 ml-1">
-                  <span className="w-1 h-1 rounded-full bg-zinc-400 dark:bg-zinc-600 animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-1 h-1 rounded-full bg-zinc-400 dark:bg-zinc-600 animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-1 h-1 rounded-full bg-zinc-400 dark:bg-zinc-600 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <span className="w-1 h-1 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1 h-1 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1 h-1 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" style={{ animationDelay: '300ms' }} />
                 </span>
               )}
             </summary>
             <div className="px-3 pb-3 pt-2 border-t border-zinc-200 dark:border-white/5">
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-600 whitespace-pre-wrap font-mono leading-relaxed">
+              <p className="text-[11px] text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap font-mono leading-relaxed">
                 {message.thinking}
               </p>
             </div>
@@ -127,7 +136,7 @@ export default function MessageItem({ message }: Props) {
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
           </div>
         ) : !message.thinking ? (
-          <p className="text-sm text-zinc-500 dark:text-zinc-700 italic animate-pulse">Connecting to engine…</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-500 italic animate-pulse">Connecting to engine…</p>
         ) : null}
       </div>
     </div>
