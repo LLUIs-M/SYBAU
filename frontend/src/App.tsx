@@ -3,8 +3,8 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import ChatPane from "./components/ChatPane";
 import Composer from "./components/Composer";
-import type { Conversation, Message } from "./types";
-import { MODELS } from "./types";
+import type { Conversation, Message, ModelInfo } from "./types";
+import { FALLBACK_MODELS } from "./types";
 import { nanoid, parseContent } from "./lib/utils";
 
 function makeTitle(text: string): string {
@@ -14,7 +14,8 @@ function makeTitle(text: string): string {
 export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState<string>(MODELS[0].value);
+  const [availableModels, setAvailableModels] = useState<ModelInfo[]>(FALLBACK_MODELS);
+  const [selectedModel, setSelectedModel] = useState<string>(FALLBACK_MODELS[0].value);
   const [isStreaming, setIsStreaming] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
@@ -177,6 +178,31 @@ export default function App() {
   };
 
   useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:5000/tags");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.models && Array.isArray(data.models) && data.models.length > 0) {
+            const fetchedModels: ModelInfo[] = data.models.map((m: any) => ({
+              value: m.name,
+              label: m.name // We use the name itself as label
+            }));
+            setAvailableModels(fetchedModels);
+            // Verify if selected model exists in fetched models
+            if (!fetchedModels.find(m => m.value === selectedModel)) {
+              setSelectedModel(fetchedModels[0].value);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch models from server:", err);
+      }
+    };
+    fetchModels();
+  }, [selectedModel]);
+
+  useEffect(() => {
     const root = document.documentElement;
     if (theme === "dark") {
       root.classList.add("dark");
@@ -205,6 +231,7 @@ export default function App() {
         <Header
           conversation={activeConv}
           selectedModel={selectedModel}
+          models={availableModels}
           onModelChange={setSelectedModel}
           onNewChat={createConversation}
           theme={theme}

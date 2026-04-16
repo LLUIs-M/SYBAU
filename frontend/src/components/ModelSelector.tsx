@@ -1,17 +1,18 @@
 import { useState, useRef, useEffect } from "react";
-import { MODELS } from "../types";
-import { MODEL_ICONS } from "../utils/modelIcons";
+import type { ModelInfo } from "../types";
+import { getModelIcon } from "../utils/modelIcons";
 
 interface Props {
   value: string;
+  models: ModelInfo[];
   onChange: (model: string) => void;
 }
 
-export default function ModelSelector({ value, onChange }: Props) {
+export default function ModelSelector({ value, models, onChange }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const selected = MODELS.find((m) => m.value === value) ?? MODELS[0];
+  const selected = models.find((m) => m.value === value) ?? models[0] ?? { value: value, label: value };
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -31,7 +32,7 @@ export default function ModelSelector({ value, onChange }: Props) {
         className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 text-xs border border-zinc-200 dark:border-white/10 rounded-2xl px-4 py-2 outline-none cursor-pointer hover:bg-zinc-200 dark:hover:bg-white/8 hover:border-zinc-300 dark:hover:border-white/20 transition-colors"
       >
         <img
-          src={MODEL_ICONS[selected.value]}
+          src={getModelIcon(selected.value)}
           alt=""
           className="w-4 h-4 object-contain shrink-0"
         />
@@ -51,8 +52,8 @@ export default function ModelSelector({ value, onChange }: Props) {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 w-52 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/40 z-50 overflow-hidden py-1">
-          {MODELS.map((m) => (
+        <div className="absolute right-0 top-full mt-1.5 w-52 max-h-64 overflow-y-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/40 z-50 py-1">
+          {models.map((m) => (
             <button
               key={m.value}
               onClick={() => {
@@ -67,7 +68,7 @@ export default function ModelSelector({ value, onChange }: Props) {
                 }`}
             >
               <img
-                src={MODEL_ICONS[m.value]}
+                src={getModelIcon(m.value)}
                 alt=""
                 className="w-4 h-4 object-contain shrink-0"
               />

@@ -29,6 +29,16 @@ app = Flask(__name__)
 CORS(app)
 
 
+@app.route('/tags', methods=['GET'])
+def get_tags():
+    try:
+        url = 'http://127.0.0.1:11434/api/tags'
+        res = requests.get(url)
+        return Response(res.content, status=res.status_code, mimetype='application/json')
+    except Exception as e:
+        print(f"Error fetching tags: {e}")
+        return {"models": []}, 500
+
 @app.route('/chat', methods=['POST'])
 def chat():
     if request.is_json:

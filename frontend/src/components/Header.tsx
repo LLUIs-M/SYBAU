@@ -1,9 +1,10 @@
-import type { Conversation } from "../types";
+import type { Conversation, ModelInfo } from "../types";
 import ModelSelector from "./ModelSelector";
 
 interface Props {
   conversation: Conversation | null;
   selectedModel: string;
+  models: ModelInfo[];
   onModelChange: (model: string) => void;
   onNewChat: () => void;
   theme: string;
@@ -13,6 +14,7 @@ interface Props {
 export default function Header({
   conversation,
   selectedModel,
+  models,
   onModelChange,
   onNewChat,
   theme,
@@ -22,7 +24,7 @@ export default function Header({
     <header className="absolute top-5 right-5 z-50">
       {/* Right: model selector + new chat */}
       <div className="flex items-center gap-2 shrink-0 relative">
-        <ModelSelector value={selectedModel} onChange={onModelChange} />
+        <ModelSelector value={selectedModel} models={models} onChange={onModelChange} />
 
         <button
           onClick={onNewChat}
