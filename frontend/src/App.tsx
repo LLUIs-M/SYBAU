@@ -199,8 +199,6 @@ export default function App() {
         onNew={createConversation}
         onDelete={handleDelete}
         onRename={handleRename}
-        theme={theme}
-        toggleTheme={toggleTheme}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -209,6 +207,8 @@ export default function App() {
           selectedModel={selectedModel}
           onModelChange={setSelectedModel}
           onNewChat={createConversation}
+          theme={theme}
+          toggleTheme={toggleTheme}
         />
         <ChatPane conversation={activeConv} isStreaming={isStreaming} />
         <Composer
