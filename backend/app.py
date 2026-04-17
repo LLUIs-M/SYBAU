@@ -210,5 +210,22 @@ def chat():
     return Response(stream_with_context(generate()), headers=headers)
 
 
+@app.route('/create_model', methods=['POST'])
+def create_model():
+    """Proxy for Ollama /api/create"""
+    data = request.json
+    try:
+        url = 'http://127.0.0.1:11434/api/create'
+        # Stream the creation process back to the client
+        res = requests.post(url, json=data, stream=True)
+        def generate():
+            for line in res.iter_lines():
+                if line:
+                    yield line + b'\n'
+        return Response(stream_with_context(generate()), content_type='application/x-ndjson')
+    except Exception as e:
+        print(f"Error creating model: {e}")
+        return {"error": str(e)}, 500
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000, threaded=True)

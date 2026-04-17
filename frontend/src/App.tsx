@@ -4,6 +4,7 @@ import Header from "./components/Header";
 import ChatPane from "./components/ChatPane";
 import Composer from "./components/Composer";
 import PullModelModal from "./components/PullModelModal";
+import CreateModelModal from "./components/CreateModelModal";
 import HardwareMonitor from "./components/HardwareMonitor";
 import TuningPanel from "./components/TuningPanel";
 import type { Conversation, Message, ModelInfo, TuningOptions } from "./types";
@@ -21,6 +22,7 @@ export default function App() {
   const [selectedModel, setSelectedModel] = useState<string>(FALLBACK_MODELS[0].value);
   const [showThinking, setShowThinking] = useState<boolean>(true);
   const [showPullModal, setShowPullModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [tuningOptions, setTuningOptions] = useState<TuningOptions>({ temperature: 0.7, num_ctx: 2048 });
   const [theme, setTheme] = useState(() => {
@@ -260,6 +262,7 @@ export default function App() {
           showThinking={showThinking}
           onToggleThinking={() => setShowThinking(!showThinking)}
           onOpenPullModal={() => setShowPullModal(true)}
+          onOpenCreateModal={() => setShowCreateModal(true)}
           onNewChat={createConversation}
           theme={theme}
           toggleTheme={toggleTheme}
@@ -280,6 +283,18 @@ export default function App() {
           <PullModelModal  
             onClose={() => setShowPullModal(false)} 
             onSuccess={() => fetchModels()} 
+          />
+        )}
+
+        {showCreateModal && (
+          <CreateModelModal
+            onClose={() => setShowCreateModal(false)}
+            onSuccess={() => {
+              setShowCreateModal(false);
+              fetchModels();
+            }}
+            models={availableModels}
+            selectedModel={selectedModel}
           />
         )}
       </div>
