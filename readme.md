@@ -1,4 +1,4 @@
-# VibeAI — Offline AI Chat Terminal
+# LLuMi — Web ui for local llm's
 
 A local-first AI chat interface powered by [Ollama](https://ollama.com). Supports multimodal input (text, PDF, images, audio), real-time streaming responses, and on-device speech transcription via Whisper — no cloud required.
 
