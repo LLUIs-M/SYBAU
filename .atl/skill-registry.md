@@ -2,25 +2,6 @@
 
 ## Loaded Skills
 
-### ui-ux-pro-max
-- **Trigger**: "plan, build, create, design, implement, review, fix, improve, optimize, enhance, refactor, and check UI/UX code" for "website, landing page, dashboard, admin panel, e-commerce, SaaS, portfolio, blog, and mobile app".
-- **Compact Rules**:
-> [!NOTE]
-> **Core Principles for SYBAU**:
-> - **Accessibility first**: Contrast 4.5:1, Aria-labels, Focus-states.
-> - **Motion**: Duration 150–300ms, use spring-physics for a natural feel (Motion/Framer Motion).
-> - **Tailwind**: Use semantic color tokens, avoid raw hex.
-> - **Layout**: Mobile-first, respect Safe Areas (for notched devices).
-> - **Anti-patterns**: No emojis as structural icons, avoid layout-shifting animations.
-
-### database-schema-designer
-- **Trigger**: "design robust, scalable database schemas", "normalization guidelines", "indexing strategies", "migration patterns".
-- **Compact Rules**:
-> [!NOTE]
-> - **Normalization**: 3NF for OLTP, Denormalization for OLAP.
-> - **Performance**: Composite indexes for multi-field queries, avoid SELECT * in high-load apps.
-> - **Constraints**: Use foreign keys and CHECK constraints to ensure data integrity at the DB level.
-
 ### branch-pr
 - **Trigger**: "creating a pull request", "opening a PR", "preparing changes for review".
 - **Compact Rules**:
@@ -42,6 +23,13 @@
 > [!NOTE]
 > - **Adversarial**: Force agents to find flaws that standard reviews miss.
 > - **Iterative**: Re-judge until both judges pass.
+
+### skill-creator
+- **Trigger**: "create a new skill", "add agent instructions", "document patterns for AI".
+- **Compact Rules**:
+> [!NOTE]
+> - **Pattern**: Define triggers clearly, keep rules compact.
+> - **Frontmatter**: Include name, description, version, allowed-tools.
 
 ## Project Standards (auto-resolved)
 
