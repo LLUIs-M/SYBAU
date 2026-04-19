@@ -1,15 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
-import Header from "./components/Header";
 import ChatPane from "./components/ChatPane";
 import Composer from "./components/Composer";
 import PullModelModal from "./components/PullModelModal";
 import CreateModelModal from "./components/CreateModelModal";
 import HardwareMonitor from "./components/HardwareMonitor";
-import TuningPanel from "./components/TuningPanel";
-import type { Conversation, Message, ModelInfo, TuningOptions } from "./types";
-import { FALLBACK_MODELS } from "./types";
+import type { Conversation, Message, TuningOptions } from "./types";
 import { nanoid, parseContent } from "./lib/utils";
+import { useLocalModels } from "./hooks/localModels";
 
 function makeTitle(text: string): string {
   return text.trim().slice(0, 42) || "New Conversation";
@@ -18,13 +16,15 @@ function makeTitle(text: string): string {
 export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [availableModels, setAvailableModels] = useState<ModelInfo[]>(FALLBACK_MODELS);
-  const [selectedModel, setSelectedModel] = useState<string>(FALLBACK_MODELS[0].value);
+  const { models: availableModels, selectedModel, setSelectedModel, refetch: fetchModels } = useLocalModels();
   const [showThinking, setShowThinking] = useState<boolean>(true);
   const [showPullModal, setShowPullModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [tuningOptions, setTuningOptions] = useState<TuningOptions>({ temperature: 0.7, num_ctx: 2048 });
+  const [tuningOptions, setTuningOptions] = useState<TuningOptions>({
+    temperature: 0.7,
+    num_ctx: 2048,
+  });
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("theme") || "light";
@@ -36,8 +36,63 @@ export default function App() {
 
   const activeConv = conversations.find((c) => c.id === activeId) ?? null;
 
-  const createConversation = useCallback(() => {
+  // Carga inicial de conversaciones desde la API
+  useEffect(() => {
+    fetch("http://127.0.0.1:5000/conversations")
+      .then((r) => r.json())
+      .then((data: any[]) => {
+        const convs: Conversation[] = data.map((c) => ({
+          id: c.id,
+          title: c.title,
+          model: c.model,
+          preview: c.preview ?? undefined,
+          createdAt: new Date(c.created_at),
+          messages: [], // lazy — se cargan al seleccionar
+        }));
+        setConversations(convs);
+      })
+      .catch(() => {}); // si el backend no está up, no crashear
+  }, []);
+
+  // Lazy load de mensajes al seleccionar una conversación
+  const loadMessages = useCallback((id: string) => {
+    setConversations((prev) => {
+      const conv = prev.find((c) => c.id === id);
+      if (!conv || conv.messages.length > 0) return prev; // ya cargado
+
+      // Fetch silencioso — sin estado de loading
+      fetch(`http://127.0.0.1:5000/conversations/${id}`)
+        .then((r) => r.json())
+        .then((data: any) => {
+          const messages: Message[] = (data.messages ?? []).map((m: any) => ({
+            id: m.id,
+            role: m.role as "user" | "assistant",
+            content: m.content,
+            model: m.model ?? undefined,
+            thinking: m.thinking ?? null,
+            thinkingDone: m.thinking != null && m.content !== "" ? true : undefined,
+          }));
+          setConversations((prev2) =>
+            prev2.map((c) => (c.id === id ? { ...c, messages } : c)),
+          );
+        })
+        .catch(() => {});
+
+      return prev; // no mutar aún — el fetch callback lo hará
+    });
+  }, []);
+
+  const handleSelect = useCallback(
+    (id: string) => {
+      setActiveId(id);
+      loadMessages(id);
+    },
+    [loadMessages],
+  );
+
+  const createConversation = useCallback(async () => {
     const id = nanoid();
+    const now = new Date().toISOString();
     const conv: Conversation = {
       id,
       title: "New Conversation",
@@ -47,18 +102,32 @@ export default function App() {
     };
     setConversations((prev) => [conv, ...prev]);
     setActiveId(id);
+
+    await fetch("http://127.0.0.1:5000/conversations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id,
+        title: "New Conversation",
+        model: selectedModel,
+        preview: "",
+        created_at: now,
+      }),
+    }).catch(() => {});
   }, [selectedModel]);
 
   const handleSend = async (text: string, files: File[]) => {
     if (isStreaming) return;
 
-    // Create conversation on-the-fly if none is active
+    // Crear conversación on-the-fly si no hay ninguna activa
     let convId = activeId;
     if (!convId) {
       convId = nanoid();
+      const now = new Date().toISOString();
+      const title = makeTitle(text);
       const conv: Conversation = {
         id: convId,
-        title: makeTitle(text),
+        title,
         messages: [],
         model: selectedModel,
         createdAt: new Date(),
@@ -66,6 +135,18 @@ export default function App() {
       };
       setConversations((prev) => [conv, ...prev]);
       setActiveId(convId);
+
+      await fetch("http://127.0.0.1:5000/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: convId,
+          title,
+          model: selectedModel,
+          preview: text.slice(0, 80),
+          created_at: now,
+        }),
+      }).catch(() => {});
     }
 
     // Convert images to base64 for local rendering
@@ -78,7 +159,7 @@ export default function App() {
             reader.onload = (e) => resolve(e.target?.result as string);
             reader.readAsDataURL(f);
           });
-        })
+        }),
     );
 
     const userMsgId = nanoid();
@@ -88,9 +169,8 @@ export default function App() {
       id: userMsgId,
       role: "user",
       content: text,
-      files: files.length > 0 ? files.map(f => f.name) : undefined,
+      files: files.length > 0 ? files.map((f) => f.name) : undefined,
       images: base64Images.length > 0 ? base64Images : undefined,
-      timestamp: Date.now(),
     };
     const assistantMsg: Message = {
       id: assistantMsgId,
@@ -101,7 +181,7 @@ export default function App() {
       thinkingDone: false,
     };
 
-    // Add both messages and update title if still default
+    // Agregar ambos mensajes y actualizar título si sigue siendo el default
     setConversations((prev) =>
       prev.map((c) =>
         c.id === convId
@@ -115,8 +195,26 @@ export default function App() {
       ),
     );
 
+    // Persistir el user message en DB
+    await fetch(`http://127.0.0.1:5000/conversations/${convId}/messages`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: userMsgId,
+        role: "user",
+        content: text,
+        thinking: null,
+        model: null,
+        created_at: new Date().toISOString(),
+      }),
+    }).catch(() => {});
+
     setIsStreaming(true);
     abortRef.current = new AbortController();
+
+    // Variables para capturar el contenido final al terminar el stream
+    let finalContent = "";
+    let finalThinking: string | null = null;
 
     try {
       const fd = new FormData();
@@ -144,6 +242,8 @@ export default function App() {
         accumulated += decoder.decode(value, { stream: true });
 
         const { thinking, thinkingDone, content } = parseContent(accumulated);
+        finalContent = content;
+        finalThinking = thinking ?? null;
 
         setConversations((prev) =>
           prev.map((c) => {
@@ -161,6 +261,33 @@ export default function App() {
           }),
         );
       }
+
+      // Stream terminado — persistir assistant message y actualizar preview de la conv
+      const assistantCreatedAt = new Date().toISOString();
+      await fetch(
+        `http://127.0.0.1:5000/conversations/${convId}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: assistantMsgId,
+            role: "assistant",
+            content: finalContent,
+            thinking: finalThinking,
+            model: selectedModel,
+            created_at: assistantCreatedAt,
+          }),
+        },
+      ).catch(() => {});
+
+      await fetch(`http://127.0.0.1:5000/conversations/${convId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          preview: finalContent.slice(0, 80) || text.slice(0, 80),
+          updated_at: assistantCreatedAt,
+        }),
+      }).catch(() => {});
     } catch (err) {
       if (err instanceof Error && err.name !== "AbortError") {
         setConversations((prev) =>
@@ -194,39 +321,21 @@ export default function App() {
   const handleDelete = (id: string) => {
     setConversations((prev) => prev.filter((c) => c.id !== id));
     if (activeId === id) setActiveId(null);
+    fetch(`http://127.0.0.1:5000/conversations/${id}`, {
+      method: "DELETE",
+    }).catch(() => {});
   };
 
   const handleRename = (id: string, title: string) => {
     setConversations((prev) =>
       prev.map((c) => (c.id === id ? { ...c, title } : c)),
     );
+    fetch(`http://127.0.0.1:5000/conversations/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, updated_at: new Date().toISOString() }),
+    }).catch(() => {});
   };
-
-  const fetchModels = async () => {
-    try {
-      const res = await fetch("http://127.0.0.1:5000/tags");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.models && Array.isArray(data.models) && data.models.length > 0) {
-          const fetchedModels: ModelInfo[] = data.models.map((m: any) => ({
-            value: m.name,
-            label: m.name // We use the name itself as label
-          }));
-          setAvailableModels(fetchedModels);
-          // Verify if selected model exists in fetched models
-          if (!fetchedModels.find(m => m.value === selectedModel)) {
-            setSelectedModel(fetchedModels[0].value);
-          }
-        }
-      }
-    } catch (err) {
-      console.error("Failed to fetch models from server:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchModels();
-  }, [selectedModel]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -247,42 +356,42 @@ export default function App() {
       <Sidebar
         conversations={conversations}
         activeId={activeId}
-        onSelect={setActiveId}
+        onSelect={handleSelect}
         onNew={createConversation}
         onDelete={handleDelete}
         onRename={handleRename}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        tuningOptions={tuningOptions}
+        setTuningOptions={setTuningOptions}
+        onOpenCreateModal={() => setShowCreateModal(true)}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Header
+        <ChatPane
           conversation={activeConv}
-          selectedModel={selectedModel}
-          models={availableModels}
-          onModelChange={setSelectedModel}
+          isStreaming={isStreaming}
           showThinking={showThinking}
-          onToggleThinking={() => setShowThinking(!showThinking)}
-          onOpenPullModal={() => setShowPullModal(true)}
-          onOpenCreateModal={() => setShowCreateModal(true)}
-          onNewChat={createConversation}
-          theme={theme}
-          toggleTheme={toggleTheme}
-          tuningOptions={tuningOptions}
-          setTuningOptions={setTuningOptions}
         />
-        <ChatPane conversation={activeConv} isStreaming={isStreaming} showThinking={showThinking} />
         <Composer
           onSend={handleSend}
           onStop={handleStop}
           isGenerating={isStreaming}
           disabled={false}
+          selectedModel={selectedModel}
+          models={availableModels}
+          onModelChange={setSelectedModel}
+          onOpenPullModal={() => setShowPullModal(true)}
+          showThinking={showThinking}
+          onToggleThinking={() => setShowThinking(!showThinking)}
         />
 
         <HardwareMonitor />
 
         {showPullModal && (
-          <PullModelModal  
-            onClose={() => setShowPullModal(false)} 
-            onSuccess={() => fetchModels()} 
+          <PullModelModal
+            onClose={() => setShowPullModal(false)}
+            onSuccess={() => fetchModels()}
           />
         )}
 

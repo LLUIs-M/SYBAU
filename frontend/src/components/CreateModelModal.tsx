@@ -57,6 +57,19 @@ export default function CreateModelModal({ onClose, onSuccess, models, selectedM
         }
       }
 
+      // Persistir metadata del modelo en DB
+      await fetch("http://127.0.0.1:5000/custom_models", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: Math.random().toString(36).slice(2, 10) + Date.now().toString(36),
+          name: name.trim(),
+          base_model: baseModel,
+          system_prompt: systemPrompt,
+          created_at: new Date().toISOString(),
+        }),
+      }).catch(() => {}); // no bloquear si falla
+
       setCreating(false);
       onSuccess();
     } catch (err: any) {

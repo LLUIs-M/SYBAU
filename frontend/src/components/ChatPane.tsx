@@ -10,7 +10,11 @@ interface Props {
   showThinking: boolean;
 }
 
-export default function ChatPane({ conversation, isStreaming, showThinking }: Props) {
+export default function ChatPane({
+  conversation,
+  isStreaming,
+  showThinking,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -39,10 +43,10 @@ export default function ChatPane({ conversation, isStreaming, showThinking }: Pr
           />
         </div>
         <div className="-ml-8">
-          <h2 className="text-5xl font-light bg-linear-to-b from-slate-900 to-slate-600 dark:text-white mb-1 bg-clip-text text-transparent">
-            SYBAU
+          <h2 className="text-5xl font-light bg-linear-to-b from-slate-900 to-slate-600 dark:text-linear-to-b dark:from-gray-300 dark:via-gray-500 dark:to-gray-500 mb-1 bg-clip-text text-transparent">
+            LLuMi
           </h2>
-          <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-md">
+          <p className="text-xs text-zinc-600 dark:text-zinc-500 leading-relaxed max-w-md">
             Local AI, private by design.
             <br />
             {conversation
