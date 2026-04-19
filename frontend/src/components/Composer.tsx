@@ -104,7 +104,7 @@ export default function Composer({
             {files.map((f, i) => (
               <div
                 key={i}
-                className="flex items-center gap-1.5 bg-zinc-100 dark:bg-white/8 border border-zinc-200 dark:border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-zinc-700 dark:text-zinc-300"
+                className="flex items-center gap-1.5 bg-zinc-100 dark:bg-white/8 border border-zinc-200 dark:border-white/10 rounded-full px-2.5 py-1.5 text-xs text-zinc-700 dark:text-zinc-300"
               >
                 <svg
                   width="11"
@@ -149,40 +149,11 @@ export default function Composer({
           <div className="flex items-center justify-between px-3 pb-3 pt-1">
             {/* Left: model selector + file actions + thinking */}
             <div className="flex items-center gap-1">
-              <ModelSelector
-                value={selectedModel}
-                models={models}
-                onChange={onModelChange}
-                onOpenPullModal={onOpenPullModal}
-                compact
-              />
-
-              <div className="w-px h-4 bg-zinc-200 dark:bg-white/10 mx-0.5" />
-
-              {/* Attach file */}
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/8 transition-colors cursor-pointer"
-                title="Attach file"
-                disabled={disabled}
-              >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
-                </svg>
-              </button>
-
               {/* Microphone */}
               {hasMic && (
                 <button
                   onClick={toggleMic}
-                  className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
+                  className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
                     isRecording
                       ? "text-red-600 bg-red-500/10 border border-red-500/20 animate-pulse cursor-pointer"
                       : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/8 cursor-pointer"
@@ -211,10 +182,31 @@ export default function Composer({
                 </button>
               )}
 
+              <div className="w-px h-4 bg-zinc-200 dark:bg-white/10 mx-0.5" />
+
+              {/* Attach file */}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="w-8 h-8 flex items-center justify-center rounded-full text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/8 transition-colors cursor-pointer"
+                title="Attach file"
+                disabled={disabled}
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                </svg>
+              </button>
+
               {/* Thinking toggle */}
               <button
                 onClick={onToggleThinking}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors cursor-pointer ${
+                className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors cursor-pointer ${
                   showThinking
                     ? "text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10"
                     : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/8"
@@ -251,39 +243,48 @@ export default function Composer({
               />
             </div>
 
-            {/* Send / Stop button */}
-            <button
-              onClick={handleSend}
-              disabled={!isGenerating && !canSend}
-              className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-200 ${
-                isGenerating
-                  ? "bg-red-500/15 text-red-500 hover:bg-red-500/25 border border-red-500/25 cursor-pointer"
-                  : canSend
-                    ? "bg-black hover:bg-black/80 dark:bg-white dark:hover:bg-white/80 dark:text-black text-white shadow-sm shadow-black/20 cursor-pointer"
-                    : "bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
-              }`}
-              title={isGenerating ? "Stop generation" : "Send message"}
-            >
-              {isGenerating ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 640 640"
-                  className="w-4 h-4"
-                  fill="currentColor"
-                >
-                  <path d="M160 96L480 96C515.3 96 544 124.7 544 160L544 480C544 515.3 515.3 544 480 544L160 544C124.7 544 96 515.3 96 480L96 160C96 124.7 124.7 96 160 96z" />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 640 640"
-                  className="w-4 h-4"
-                  fill="currentColor"
-                >
-                  <path d="M568.4 37.7C578.2 34.2 589 36.7 596.4 44C603.8 51.3 606.2 62.2 602.7 72L424.7 568.9C419.7 582.8 406.6 592 391.9 592C377.7 592 364.9 583.4 359.6 570.3L295.4 412.3C290.9 401.3 292.9 388.7 300.6 379.7L395.1 267.3C400.2 261.2 399.8 252.3 394.2 246.7C388.6 241.1 379.6 240.7 373.6 245.8L261.2 340.1C252.1 347.7 239.6 349.7 228.6 345.3L70.1 280.8C57 275.5 48.4 262.7 48.4 248.5C48.4 233.8 57.6 220.7 71.5 215.7L568.4 37.7z" />
-                </svg>
-              )}
-            </button>
+            {/* Send / Stop button / Model Selector */}
+            <div className="flex items-center gap-3">
+              <ModelSelector
+                value={selectedModel}
+                models={models}
+                onChange={onModelChange}
+                onOpenPullModal={onOpenPullModal}
+              />
+
+              <button
+                onClick={handleSend}
+                disabled={!isGenerating && !canSend}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 ${
+                  isGenerating
+                    ? "bg-red-500/15 text-red-500 hover:bg-red-500/25 border border-red-500/25 cursor-pointer"
+                    : canSend
+                      ? "bg-black hover:bg-black/80 dark:bg-white dark:hover:bg-white/80 dark:text-black text-white shadow-sm shadow-black/20 cursor-pointer"
+                      : "bg-zinc-100 dark:bg-white/5 text-zinc-400 dark:text-zinc-600 cursor-not-allowed"
+                }`}
+                title={isGenerating ? "Stop generation" : "Send message"}
+              >
+                {isGenerating ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 640 640"
+                    className="w-4 h-4"
+                    fill="currentColor"
+                  >
+                    <path d="M160 96L480 96C515.3 96 544 124.7 544 160L544 480C544 515.3 515.3 544 480 544L160 544C124.7 544 96 515.3 96 480L96 160C96 124.7 124.7 96 160 96z" />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 640 640"
+                    className="w-4 h-4"
+                    fill="currentColor"
+                  >
+                    <path d="M568.4 37.7C578.2 34.2 589 36.7 596.4 44C603.8 51.3 606.2 62.2 602.7 72L424.7 568.9C419.7 582.8 406.6 592 391.9 592C377.7 592 364.9 583.4 359.6 570.3L295.4 412.3C290.9 401.3 292.9 388.7 300.6 379.7L395.1 267.3C400.2 261.2 399.8 252.3 394.2 246.7C388.6 241.1 379.6 240.7 373.6 245.8L261.2 340.1C252.1 347.7 239.6 349.7 228.6 345.3L70.1 280.8C57 275.5 48.4 262.7 48.4 248.5C48.4 233.8 57.6 220.7 71.5 215.7L568.4 37.7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
         </HoverBorderGradient>
 

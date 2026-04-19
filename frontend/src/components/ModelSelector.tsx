@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import type { ModelInfo } from "../types";
 import { getModelIcon } from "../utils/modelIcons";
 
@@ -18,64 +19,50 @@ export default function ModelSelector({
   compact = false,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const selected = models.find((m) => m.value === value) ??
     models[0] ?? { value: value, label: value };
 
+  const calcPosition = () => {
+    const el = triggerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setDropdownStyle({
+      position: "fixed",
+      bottom: window.innerHeight - rect.top + 6,
+      left: rect.left,
+      width: 208,
+      zIndex: 9999,
+    });
+  };
+
+  const handleOpen = () => {
+    calcPosition();
+    setOpen((v) => !v);
+  };
+
   useEffect(() => {
+    if (!open) return;
     function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      if (
+        ref.current && !ref.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [open]);
 
-  return (
-    <div ref={ref} className="relative">
-      {/* Trigger */}
-      {compact ? (
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/8 transition-colors cursor-pointer"
-          title={selected.label}
+  const dropdown = open
+    ? createPortal(
+        <div
+          style={dropdownStyle}
+          className="max-h-64 overflow-y-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/40 py-1"
         >
-          <img
-            src={getModelIcon(selected.value)}
-            alt=""
-            className="w-4 h-4 object-contain"
-          />
-        </button>
-      ) : (
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 backdrop-blur-md text-zinc-700 dark:text-zinc-300 text-xs border border-zinc-200 dark:border-white/10 rounded-full px-4 py-2 outline-none cursor-pointer hover:bg-zinc-200 dark:hover:bg-white/8 hover:border-zinc-300 dark:hover:border-white/20 transition-colors"
-        >
-          <img
-            src={getModelIcon(selected.value)}
-            alt=""
-            className="w-4 h-4 object-contain shrink-0"
-          />
-          <span className="max-w-30 truncate">{selected.label}</span>
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className={`shrink-0 text-zinc-400 dark:text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`}
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
-      )}
-
-      {/* Dropdown */}
-      {open && (
-        <div className={`absolute left-0 w-52 max-h-64 overflow-y-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/40 z-50 py-1 ${compact ? "bottom-full mb-1.5" : "top-full right-0 mt-1.5"}`}>
           {models.map((m) => (
             <button
               key={m.value}
@@ -139,8 +126,53 @@ export default function ModelSelector({
               </button>
             </>
           )}
-        </div>
+        </div>,
+        document.body
+      )
+    : null;
+
+  return (
+    <div ref={ref} className="relative">
+      {compact ? (
+        <button
+          ref={triggerRef}
+          onClick={handleOpen}
+          className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-white/8 transition-colors cursor-pointer"
+          title={selected.label}
+        >
+          <img
+            src={getModelIcon(selected.value)}
+            alt=""
+            className="w-4 h-4 object-contain"
+          />
+        </button>
+      ) : (
+        <button
+          ref={triggerRef}
+          onClick={handleOpen}
+          className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 backdrop-blur-md text-zinc-700 dark:text-zinc-300 text-xs border border-zinc-200 dark:border-white/10 rounded-full px-4 py-2 outline-none cursor-pointer hover:bg-zinc-200 dark:hover:bg-white/8 hover:border-zinc-300 dark:hover:border-white/20 transition-colors"
+        >
+          <img
+            src={getModelIcon(selected.value)}
+            alt=""
+            className="w-4 h-4 object-contain shrink-0"
+          />
+          <span className="max-w-30 truncate">{selected.label}</span>
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className={`shrink-0 text-zinc-400 dark:text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`}
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
       )}
+
+      {dropdown}
     </div>
   );
 }
