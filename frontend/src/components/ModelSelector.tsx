@@ -22,6 +22,7 @@ export default function ModelSelector({
   const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
   const ref = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const selected = models.find((m) => m.value === value) ??
     models[0] ?? { value: value, label: value };
@@ -47,11 +48,10 @@ export default function ModelSelector({
   useEffect(() => {
     if (!open) return;
     function handleClickOutside(e: MouseEvent) {
-      if (
-        ref.current && !ref.current.contains(e.target as Node)
-      ) {
-        setOpen(false);
-      }
+      const target = e.target as Node;
+      const inTrigger = ref.current?.contains(target);
+      const inDropdown = dropdownRef.current?.contains(target);
+      if (!inTrigger && !inDropdown) setOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -60,6 +60,7 @@ export default function ModelSelector({
   const dropdown = open
     ? createPortal(
         <div
+          ref={dropdownRef}
           style={dropdownStyle}
           className="max-h-64 overflow-y-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/40 py-1"
         >

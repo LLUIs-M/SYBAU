@@ -5,9 +5,9 @@ import Composer from "./components/Composer";
 import PullModelModal from "./components/PullModelModal";
 import CreateModelModal from "./components/CreateModelModal";
 import HardwareMonitor from "./components/HardwareMonitor";
-import type { Conversation, Message, ModelInfo, TuningOptions } from "./types";
-import { FALLBACK_MODELS } from "./types";
+import type { Conversation, Message, TuningOptions } from "./types";
 import { nanoid, parseContent } from "./lib/utils";
+import { useLocalModels } from "./hooks/localModels";
 
 function makeTitle(text: string): string {
   return text.trim().slice(0, 42) || "New Conversation";
@@ -16,11 +16,7 @@ function makeTitle(text: string): string {
 export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [availableModels, setAvailableModels] =
-    useState<ModelInfo[]>(FALLBACK_MODELS);
-  const [selectedModel, setSelectedModel] = useState<string>(
-    FALLBACK_MODELS[0].value,
-  );
+  const { models: availableModels, selectedModel, setSelectedModel, refetch: fetchModels } = useLocalModels();
   const [showThinking, setShowThinking] = useState<boolean>(true);
   const [showPullModal, setShowPullModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -204,36 +200,6 @@ export default function App() {
       prev.map((c) => (c.id === id ? { ...c, title } : c)),
     );
   };
-
-  const fetchModels = async () => {
-    try {
-      const res = await fetch("http://127.0.0.1:5000/tags");
-      if (res.ok) {
-        const data = await res.json();
-        if (
-          data.models &&
-          Array.isArray(data.models) &&
-          data.models.length > 0
-        ) {
-          const fetchedModels: ModelInfo[] = data.models.map((m: any) => ({
-            value: m.name,
-            label: m.name, // We use the name itself as label
-          }));
-          setAvailableModels(fetchedModels);
-          // Verify if selected model exists in fetched models
-          if (!fetchedModels.find((m) => m.value === selectedModel)) {
-            setSelectedModel(fetchedModels[0].value);
-          }
-        }
-      }
-    } catch (err) {
-      console.error("Failed to fetch models from server:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchModels();
-  }, [selectedModel]);
 
   useEffect(() => {
     const root = document.documentElement;

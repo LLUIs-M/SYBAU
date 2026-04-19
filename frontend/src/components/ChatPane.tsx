@@ -43,7 +43,7 @@ export default function ChatPane({
           />
         </div>
         <div className="-ml-8">
-          <h2 className="text-5xl font-light bg-linear-to-b from-slate-900 to-slate-600 dark:text-linear-to-b dark:from-gray-500 dark:via-gray-600 dark:to-gray-800 mb-1 bg-clip-text text-transparent">
+          <h2 className="text-5xl font-light bg-linear-to-b from-slate-900 to-slate-600 dark:text-linear-to-b dark:from-gray-300 dark:via-gray-500 dark:to-gray-500 mb-1 bg-clip-text text-transparent">
             LLuMi
           </h2>
           <p className="text-xs text-zinc-600 dark:text-zinc-500 leading-relaxed max-w-md">
