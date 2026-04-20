@@ -102,10 +102,12 @@ def chat():
         messages = data.get('messages', [])
         show_thinking = data.get('showThinking', True)
         options = data.get('options', {})
+        system_prompt = data.get('system_prompt', '')
     else:
         model_name = request.form.get('model', 'deepseek-r1:8b')
         user_text = request.form.get('text', '')
         show_thinking = request.form.get('showThinking', 'true').lower() == 'true'
+        system_prompt = request.form.get('system_prompt', '')
 
         # Try to parse options_json from formData
         options_json = request.form.get('options_json', None)
@@ -153,11 +155,26 @@ def chat():
 
                     message_obj["content"] += f"\n\n[Attached Audio Transcript ({filename}):]\n{transcription}"
 
-        messages = [message_obj]
+        # Build messages with conversation history for context
+        history_json = request.form.get('history_json', None)
+        history = []
+        if history_json:
+            try:
+                history = json.loads(history_json)
+            except:
+                pass
+        messages = history + [message_obj]
 
     def generate():
         try:
             url = 'http://127.0.0.1:11434/api/chat'
+
+            # Inject persona system prompt if provided
+            if system_prompt:
+                messages.insert(0, {
+                    "role": "system",
+                    "content": system_prompt
+                })
             
             # If thinking is disabled, we instruct the model to avoid generating it
             if not show_thinking:

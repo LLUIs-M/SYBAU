@@ -18,47 +18,15 @@ export default function CreateModelModal({ onClose, onSuccess, models, selectedM
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      setError("Model name is required.");
+      setError("Persona name is required.");
       return;
     }
     setError(null);
     setCreating(true);
-    setProgress("Initializing...");
-
-    const modelfile = `FROM ${baseModel}\nSYSTEM """${systemPrompt}"""`;
+    setProgress("Saving persona...");
 
     try {
-      const res = await fetch("http://127.0.0.1:5000/create_model", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name.trim(),
-          modelfile: modelfile
-        })
-      });
-
-      if (!res.ok) {
-        throw new Error("Creation failed.");
-      }
-
-      if (res.body) {
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const lines = decoder.decode(value).split("\n").filter(Boolean);
-          for (const line of lines) {
-            try {
-              const data = JSON.parse(line);
-              if (data.status) setProgress(data.status);
-            } catch (e) {}
-          }
-        }
-      }
-
-      // Persistir metadata del modelo en DB
-      await fetch("http://127.0.0.1:5000/custom_models", {
+      const res = await fetch("http://127.0.0.1:5000/custom_models", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -68,7 +36,11 @@ export default function CreateModelModal({ onClose, onSuccess, models, selectedM
           system_prompt: systemPrompt,
           created_at: new Date().toISOString(),
         }),
-      }).catch(() => {}); // no bloquear si falla
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to save persona.");
+      }
 
       setCreating(false);
       onSuccess();
@@ -80,15 +52,15 @@ export default function CreateModelModal({ onClose, onSuccess, models, selectedM
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div 
+      <div
         className="w-full max-w-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl p-6 animate-in zoom-in-95"
       >
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold font-sans tracking-tight text-zinc-800 dark:text-zinc-100 flex items-center gap-2">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-            Create Assistant
+            Create Persona
           </h2>
-          <button 
+          <button
             onClick={onClose}
             disabled={creating}
             className="text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors disabled:opacity-50"
@@ -100,7 +72,7 @@ export default function CreateModelModal({ onClose, onSuccess, models, selectedM
         <div className="space-y-4">
           <div>
             <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5 block">Assistant Name</label>
-            <input 
+            <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. yoda-bot"
@@ -128,7 +100,7 @@ export default function CreateModelModal({ onClose, onSuccess, models, selectedM
               <span>System Prompt</span>
               <span className="text-xs text-zinc-500 font-normal">Personality/Rules</span>
             </label>
-            <textarea 
+            <textarea
               value={systemPrompt}
               onChange={(e) => setSystemPrompt(e.target.value)}
               placeholder="You are Yoda, a wise Jedi Master..."
@@ -159,7 +131,7 @@ export default function CreateModelModal({ onClose, onSuccess, models, selectedM
               ${creating ? 'bg-zinc-400 dark:bg-zinc-700 cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 active:scale-95 shadow-md hover:shadow-lg'}
             `}
           >
-            {creating ? 'Creating...' : 'Create Model'}
+            {creating ? 'Creating...' : 'Create Persona'}
           </button>
         </div>
       </div>

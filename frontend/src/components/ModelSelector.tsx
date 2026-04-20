@@ -1,21 +1,29 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import type { ModelInfo } from "../types";
+import type { ModelInfo, Persona } from "../types";
 import { getModelIcon } from "../utils/modelIcons";
 
 interface Props {
   value: string;
   models: ModelInfo[];
+  personas?: Persona[];
+  activePersonaName?: string | null;
   onChange: (model: string) => void;
+  onPersonaToggle?: (personaName: string) => void;
   onOpenPullModal?: () => void;
+  onDeletePersona?: (id: string) => void;
   compact?: boolean;
 }
 
 export default function ModelSelector({
   value,
   models,
+  personas = [],
+  activePersonaName = null,
   onChange,
+  onPersonaToggle,
   onOpenPullModal,
+  onDeletePersona,
   compact = false,
 }: Props) {
   const [open, setOpen] = useState(false);
@@ -35,7 +43,7 @@ export default function ModelSelector({
       position: "fixed",
       bottom: window.innerHeight - rect.top + 6,
       left: rect.left,
-      width: 208,
+      width: 240,
       zIndex: 9999,
     });
   };
@@ -57,13 +65,84 @@ export default function ModelSelector({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
+  const hasActivePersona = !!activePersonaName;
+
   const dropdown = open
     ? createPortal(
         <div
           ref={dropdownRef}
           style={dropdownStyle}
-          className="max-h-64 overflow-y-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/40 py-1"
+          className="max-h-72 overflow-y-auto bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-xl shadow-xl shadow-black/10 dark:shadow-black/40 py-1"
         >
+          {/* Personas section */}
+          <p className="text-[10px] text-zinc-400 dark:text-zinc-600 uppercase tracking-widest font-semibold px-3 pt-2 pb-1">
+            Personas
+          </p>
+          {personas.length === 0 ? (
+            <p className="text-[11px] text-zinc-400 dark:text-zinc-600 px-3 py-2 italic">
+              No personas yet
+            </p>
+          ) : (
+            personas.map((p) => {
+              const isActive = activePersonaName === p.name;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => {
+                    onPersonaToggle?.(p.name);
+                  }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left transition-colors group
+                    ${
+                      isActive
+                        ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300"
+                        : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white"
+                    }`}
+                >
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 uppercase ${
+                    isActive
+                      ? "bg-gradient-to-br from-indigo-500 to-purple-600 text-white"
+                      : "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
+                  }`}>
+                    {p.name.charAt(0)}
+                  </span>
+                  <span className="truncate flex-1">{p.name}</span>
+                  {isActive && (
+                    <svg
+                      className="shrink-0 text-indigo-500"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                  {onDeletePersona && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeletePersona(p.id);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 shrink-0 text-zinc-400 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400 transition-all"
+                      title="Delete persona"
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                    </button>
+                  )}
+                </button>
+              );
+            })
+          )}
+          <div className="h-px bg-zinc-200 dark:bg-white/10 my-1 mx-2" />
+
+          {/* Models section */}
+          <p className="text-[10px] text-zinc-400 dark:text-zinc-600 uppercase tracking-widest font-semibold px-3 pt-2 pb-1">
+            Models
+          </p>
           {models.map((m) => (
             <button
               key={m.value}
@@ -133,7 +212,25 @@ export default function ModelSelector({
     : null;
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative flex items-center gap-1.5">
+      {/* Persona badge — shown when a persona is active */}
+      {hasActivePersona && (
+        <button
+          onClick={() => onPersonaToggle?.(activePersonaName!)}
+          className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/20 rounded-full px-2.5 py-1.5 text-[11px] font-medium cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-500/15 transition-colors"
+          title={`Persona: ${activePersonaName} (click to remove)`}
+        >
+          <span className="w-4 h-4 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[8px] font-bold shrink-0 uppercase">
+            {activePersonaName!.charAt(0)}
+          </span>
+          <span className="max-w-20 truncate">{activePersonaName}</span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0 text-indigo-400">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      )}
+
+      {/* Model selector button — always shows the selected model */}
       {compact ? (
         <button
           ref={triggerRef}
@@ -151,7 +248,7 @@ export default function ModelSelector({
         <button
           ref={triggerRef}
           onClick={handleOpen}
-          className="flex items-center gap-2 bg-zinc-100 dark:bg-white/5 backdrop-blur-md text-zinc-700 dark:text-zinc-300 text-xs border border-zinc-200 dark:border-white/10 rounded-full px-4 py-2 outline-none cursor-pointer hover:bg-zinc-200 dark:hover:bg-white/8 hover:border-zinc-300 dark:hover:border-white/20 transition-colors"
+          className="flex items-center gap-2 backdrop-blur-md text-xs border rounded-full px-4 py-2 outline-none cursor-pointer transition-colors bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-white/10 hover:bg-zinc-200 dark:hover:bg-white/8 hover:border-zinc-300 dark:hover:border-white/20"
         >
           <img
             src={getModelIcon(selected.value)}

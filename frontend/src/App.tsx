@@ -5,9 +5,10 @@ import Composer from "./components/Composer";
 import PullModelModal from "./components/PullModelModal";
 import CreateModelModal from "./components/CreateModelModal";
 import HardwareMonitor from "./components/HardwareMonitor";
-import type { Conversation, Message, TuningOptions } from "./types";
+import type { Conversation, Message, TuningOptions, Persona } from "./types";
 import { nanoid, parseContent } from "./lib/utils";
 import { useLocalModels } from "./hooks/localModels";
+import { usePersonas } from "./hooks/usePersonas";
 
 function makeTitle(text: string): string {
   return text.trim().slice(0, 42) || "New Conversation";
@@ -17,10 +18,12 @@ export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const { models: availableModels, selectedModel, setSelectedModel, refetch: fetchModels } = useLocalModels();
+  const { personas, refetch: fetchPersonas } = usePersonas();
   const [showThinking, setShowThinking] = useState<boolean>(true);
   const [showPullModal, setShowPullModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [activePersona, setActivePersona] = useState<Persona | null>(null);
   const [tuningOptions, setTuningOptions] = useState<TuningOptions>({
     temperature: 0.7,
     num_ctx: 2048,
@@ -222,6 +225,26 @@ export default function App() {
       fd.append("text", text);
       fd.append("showThinking", showThinking.toString());
       fd.append("options_json", JSON.stringify(tuningOptions));
+      if (activePersona?.system_prompt) {
+        fd.append("system_prompt", activePersona.system_prompt);
+      }
+
+      // Send conversation history so the model has full context
+      // (critical when switching models or using personas)
+      const currentConv = conversations.find((c) => c.id === convId);
+      if (currentConv && currentConv.messages.length > 0) {
+        // Include all prior messages (excluding the empty assistant placeholder we just added)
+        const history = currentConv.messages
+          .filter((m) => m.id !== assistantMsgId && m.content.trim() !== "")
+          .map((m) => ({
+            role: m.role,
+            content: m.content,
+          }));
+        if (history.length > 0) {
+          fd.append("history_json", JSON.stringify(history));
+        }
+      }
+
       for (const file of files) fd.append("file", file);
 
       const res = await fetch("http://127.0.0.1:5000/chat", {
@@ -384,6 +407,21 @@ export default function App() {
           onOpenPullModal={() => setShowPullModal(true)}
           showThinking={showThinking}
           onToggleThinking={() => setShowThinking(!showThinking)}
+          personas={personas}
+          activePersonaName={activePersona?.name ?? null}
+          onPersonaToggle={(name) => {
+            if (activePersona?.name === name) {
+              setActivePersona(null);
+            } else {
+              const persona = personas.find((p) => p.name === name);
+              setActivePersona(persona ?? null);
+            }
+          }}
+          onDeletePersona={async (id) => {
+            if (activePersona?.id === id) setActivePersona(null);
+            await fetch(`http://127.0.0.1:5000/custom_models/${id}`, { method: "DELETE" }).catch(() => {});
+            fetchPersonas();
+          }}
         />
 
         <HardwareMonitor />
@@ -401,6 +439,7 @@ export default function App() {
             onSuccess={() => {
               setShowCreateModal(false);
               fetchModels();
+              fetchPersonas();
             }}
             models={availableModels}
             selectedModel={selectedModel}
