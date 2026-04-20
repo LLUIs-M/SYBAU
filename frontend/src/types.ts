@@ -24,6 +24,14 @@ export interface ModelInfo {
   label: string;
 }
 
+export interface Persona {
+  id: string;
+  name: string;
+  base_model: string;
+  system_prompt: string;
+  created_at: string;
+}
+
 export interface TuningOptions {
   temperature: number;
   num_ctx: number;

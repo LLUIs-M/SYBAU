@@ -37,16 +37,14 @@ export default function Sidebar({
   mobileOpen,
   onMobileClose,
 }: Props) {
-  const [search, setSearch] = useState("");
+
   const [showTuning, setShowTuning] = useState(false);
   const [isSideOpen, setIsSideOpen] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
 
   const isExpanded = isSideOpen || isHovered;
 
-  const filtered = conversations.filter((c) =>
-    c.title.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filtered = conversations;
 
   const groups: Record<string, Conversation[]> = {};
   for (const conv of filtered) {
@@ -180,7 +178,7 @@ export default function Sidebar({
           <span
             className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isExpanded ? "max-w-xs opacity-100" : "max-w-0 opacity-0"}`}
           >
-            Crear Modelo
+            Crear Persona
           </span>
         </button>
 

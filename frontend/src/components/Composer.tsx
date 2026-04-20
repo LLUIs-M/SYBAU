@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { HoverBorderGradient } from "./ui/hover-border-gradient";
 import ModelSelector from "./ModelSelector";
-import type { ModelInfo } from "../types";
+import type { ModelInfo, Persona } from "../types";
 
 interface Props {
   onSend: (text: string, files: File[]) => void;
@@ -14,6 +14,10 @@ interface Props {
   onOpenPullModal?: () => void;
   showThinking: boolean;
   onToggleThinking: () => void;
+  personas?: Persona[];
+  activePersonaName?: string | null;
+  onPersonaToggle?: (name: string) => void;
+  onDeletePersona?: (id: string) => void;
 }
 
 export default function Composer({
@@ -27,6 +31,10 @@ export default function Composer({
   onOpenPullModal,
   showThinking,
   onToggleThinking,
+  personas,
+  activePersonaName,
+  onPersonaToggle,
+  onDeletePersona,
 }: Props) {
   const [text, setText] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -248,8 +256,12 @@ export default function Composer({
               <ModelSelector
                 value={selectedModel}
                 models={models}
+                personas={personas}
+                activePersonaName={activePersonaName}
                 onChange={onModelChange}
+                onPersonaToggle={onPersonaToggle}
                 onOpenPullModal={onOpenPullModal}
+                onDeletePersona={onDeletePersona}
               />
 
               <button
