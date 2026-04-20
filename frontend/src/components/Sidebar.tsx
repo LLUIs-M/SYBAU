@@ -16,6 +16,8 @@ interface Props {
   tuningOptions: TuningOptions;
   setTuningOptions: (opts: TuningOptions) => void;
   onOpenCreateModal: () => void;
+  mobileOpen: boolean;
+  onMobileClose: () => void;
 }
 
 const GROUP_ORDER = ["Today", "Yesterday", "This Week", "Older"];
@@ -32,6 +34,8 @@ export default function Sidebar({
   tuningOptions,
   setTuningOptions,
   onOpenCreateModal,
+  mobileOpen,
+  onMobileClose,
 }: Props) {
   const [search, setSearch] = useState("");
   const [showTuning, setShowTuning] = useState(false);
@@ -53,7 +57,7 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`${isExpanded ? "w-60" : "w-14"} h-full bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-white/6 flex flex-col shrink-0 transition-all duration-200 overflow-hidden`}
+      className={`fixed inset-y-0 left-0 z-50 lg:relative lg:z-auto lg:inset-auto ${mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} ${isExpanded ? "w-72 lg:w-60" : "w-72 lg:w-14"} h-full bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-200 dark:border-white/6 flex flex-col shrink-0 transition-all duration-200 overflow-hidden`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -86,11 +90,21 @@ export default function Sidebar({
             <path d="M480 272C480 317.9 465.1 360.3 440 394.7L566.6 521.4C579.1 533.9 579.1 554.2 566.6 566.7C554.1 579.2 533.8 579.2 521.3 566.7L394.7 440C360.3 465.1 317.9 480 272 480C157.1 480 64 386.9 64 272C64 157.1 157.1 64 272 64C386.9 64 480 157.1 480 272zM272 416C351.5 416 416 351.5 416 272C416 192.5 351.5 128 272 128C192.5 128 128 192.5 128 272C128 351.5 192.5 416 272 416z" />
           </svg>
         )}
+
+        <button
+          onClick={onMobileClose}
+          className="lg:hidden ml-auto text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
+          title="Close menu"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="w-5 h-5" fill="currentColor">
+            <path d="M585 105C598.3 91.75 598.3 70.3 585 57.05C571.7 43.8 550.3 43.8 537 57.05L320 274.1L103 57.05C89.75 43.8 68.25 43.8 55 57.05C41.75 70.3 41.75 91.75 55 105L272 320L55 535C41.75 548.3 41.75 569.7 55 582.9C68.25 596.2 89.75 596.2 103 582.9L320 366L537 583C550.3 596.2 571.7 596.2 585 583C598.3 569.7 598.3 548.3 585 535L368 320L585 105z" />
+          </svg>
+        </button>
       </div>
 
       <div className="px-2">
         <button
-          onClick={onNew}
+          onClick={() => { onNew(); onMobileClose(); }}
           className="flex items-center w-full gap-2 text-[13px] font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm hover:bg-zinc-100 dark:hover:bg-white/8 border border-zinc-200 dark:border-white/10 px-3 py-2 rounded-full transition-colors cursor-pointer shadow-sm"
           title="New conversation"
         >
@@ -111,7 +125,7 @@ export default function Sidebar({
       </div>
 
       {/* Conversation list */}
-      {isExpanded && (
+      {(isExpanded || mobileOpen) && (
         <div className="flex-1 overflow-y-auto px-2 pb-2">
           {conversations.length === 0 && (
             <div className="text-center py-10 px-4">
@@ -137,7 +151,7 @@ export default function Sidebar({
                   key={conv.id}
                   conversation={conv}
                   isActive={conv.id === activeId}
-                  onSelect={() => onSelect(conv.id)}
+                  onSelect={() => { onSelect(conv.id); onMobileClose(); }}
                   onDelete={() => onDelete(conv.id)}
                   onRename={(title) => onRename(conv.id, title)}
                 />

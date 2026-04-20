@@ -34,16 +34,16 @@ export default function ChatPane({
   // Empty state
   if (!conversation || conversation.messages.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center text-center px-8 select-none">
+      <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-8 overflow-hidden select-none">
         {/* Robot 3D */}
-        <div className="h-72 w-72 pointer-events-none">
+        <div className="h-48 w-48 sm:h-60 sm:w-60 md:h-72 md:w-72 pointer-events-none">
           <Spline
             scene="https://prod.spline.design/hqK1EFPvjhbK8-sS/scene.splinecode"
             onLoad={onLoad}
           />
         </div>
-        <div className="-ml-8">
-          <h2 className="text-5xl font-light bg-linear-to-b from-slate-900 to-slate-600 dark:text-linear-to-b dark:from-gray-300 dark:via-gray-500 dark:to-gray-500 mb-1 bg-clip-text text-transparent">
+        <div className="-ml-4 sm:-ml-8">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-light bg-linear-to-b from-slate-900 to-slate-600 dark:text-linear-to-b dark:from-gray-300 dark:via-gray-500 dark:to-gray-500 mb-1 bg-clip-text text-transparent">
             LLuMi
           </h2>
           <p className="text-xs text-zinc-600 dark:text-zinc-500 leading-relaxed max-w-md">
