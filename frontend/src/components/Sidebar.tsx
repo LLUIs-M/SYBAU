@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import type { Conversation, TuningOptions } from "../types";
 import { groupByDate } from "../lib/utils";
 import ConversationRow from "./ConversationRow";
@@ -42,6 +42,7 @@ export default function Sidebar({
   const [showTuning, setShowTuning] = useState(false);
   const [isSideOpen, setIsSideOpen] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const tuningTriggerRef = useRef<HTMLButtonElement>(null);
 
   const isExpanded = isSideOpen || isHovered;
 
@@ -211,6 +212,7 @@ export default function Sidebar({
 
         <div className="relative">
           <button
+            ref={tuningTriggerRef}
             onClick={() => setShowTuning((v) => !v)}
             className="flex items-center w-full gap-2 text-[13px] font-semibold text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white backdrop-blur-sm hover:bg-zinc-100 dark:hover:bg-white/8 px-3 py-2 rounded-full transition-colors cursor-pointer"
             title="Inference tuning"
@@ -233,7 +235,8 @@ export default function Sidebar({
             <TuningPanel
               options={tuningOptions}
               onChange={setTuningOptions}
-              popupClass="right-1/2 left-1/2 bottom-full mb-2"
+              onClose={() => setShowTuning(false)}
+              triggerEl={tuningTriggerRef.current}
             />
           )}
         </div>
