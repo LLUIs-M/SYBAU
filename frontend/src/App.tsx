@@ -379,7 +379,7 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen flex bg-[#efefef] dark:bg-[#0d0d0d] text-zinc-900 dark:text-zinc-100 overflow-hidden">
+    <div className="h-screen flex bg-[#efefef] dark:bg-[#0d0d0d] text-zinc-900 dark:text-zinc-100 overflow-hidden transition-all duration-300 ease-out">
       <Sidebar
         conversations={conversations}
         activeId={activeId}

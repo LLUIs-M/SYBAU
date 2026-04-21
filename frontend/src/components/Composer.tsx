@@ -141,7 +141,7 @@ export default function Composer({
         <HoverBorderGradient
           as="div"
           containerClassName="rounded-2xl w-full"
-          className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm dark:shadow-none border-2 border-zinc-100 dark:border-white/5"
+          className="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm dark:shadow-none border-2 border-zinc-100 dark:border-white/5 transition-colors duration-300 ease-out"
         >
           <textarea
             ref={textareaRef}
