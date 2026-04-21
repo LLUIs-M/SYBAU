@@ -29,7 +29,7 @@ export default function MessageItem({ message, showThinking = true }: Props) {
 
   if (message.role === 'user') {
     return (
-      <div className="flex justify-end">
+      <div id={`message-${message.id}`} className="flex justify-end p-2 -mx-2 rounded-xl transition-all duration-1000">
         <div className="max-w-[80%]">
           <div className="bg-zinc-100 dark:bg-white/8 border border-zinc-200 dark:border-white/10 rounded-2xl rounded-tr-sm px-4 py-3 text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed">
             <p className="whitespace-pre-wrap">{message.content}</p>
@@ -66,7 +66,7 @@ export default function MessageItem({ message, showThinking = true }: Props) {
 
   // Assistant message
   return (
-    <div className="flex gap-3">
+    <div id={`message-${message.id}`} className="flex gap-3 p-2 -mx-2 rounded-xl transition-all duration-1000">
       {/* Avatar */}
       {getModelIcon(message.model) ? (
         <img

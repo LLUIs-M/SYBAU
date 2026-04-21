@@ -8,12 +8,16 @@ interface Props {
   conversation: Conversation | null;
   isStreaming: boolean;
   showThinking: boolean;
+  targetMessageId?: string | null;
+  onTargetMessageScrolled?: () => void;
 }
 
 export default function ChatPane({
   conversation,
   isStreaming,
   showThinking,
+  targetMessageId,
+  onTargetMessageScrolled,
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -30,6 +34,22 @@ export default function ChatPane({
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [conversation?.messages]);
+
+  useEffect(() => {
+    if (targetMessageId && conversation?.messages && conversation.messages.length > 0) {
+      setTimeout(() => {
+        const el = document.getElementById(`message-${targetMessageId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          el.classList.add("bg-blue-500/10", "ring-1", "ring-blue-500/50");
+          setTimeout(() => {
+            el.classList.remove("bg-blue-500/10", "ring-1", "ring-blue-500/50");
+          }, 2000);
+          if (onTargetMessageScrolled) onTargetMessageScrolled();
+        }
+      }, 100);
+    }
+  }, [targetMessageId, conversation?.messages, onTargetMessageScrolled]);
 
   // Empty state
   if (!conversation || conversation.messages.length === 0) {
