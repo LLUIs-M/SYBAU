@@ -18,7 +18,12 @@ function makeTitle(text: string): string {
 export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const { models: availableModels, selectedModel, setSelectedModel, refetch: fetchModels } = useLocalModels();
+  const {
+    models: availableModels,
+    selectedModel,
+    setSelectedModel,
+    refetch: fetchModels,
+  } = useLocalModels();
   const { personas, refetch: fetchPersonas } = usePersonas();
   const [showThinking, setShowThinking] = useState<boolean>(true);
   const [showPullModal, setShowPullModal] = useState(false);
@@ -77,7 +82,8 @@ export default function App() {
             content: m.content,
             model: m.model ?? undefined,
             thinking: m.thinking ?? null,
-            thinkingDone: m.thinking != null && m.content !== "" ? true : undefined,
+            thinkingDone:
+              m.thinking != null && m.content !== "" ? true : undefined,
           }));
           setConversations((prev2) =>
             prev2.map((c) => (c.id === id ? { ...c, messages } : c)),
@@ -292,21 +298,18 @@ export default function App() {
 
       // Stream terminado — persistir assistant message y actualizar preview de la conv
       const assistantCreatedAt = new Date().toISOString();
-      await fetch(
-        `http://127.0.0.1:5000/conversations/${convId}/messages`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: assistantMsgId,
-            role: "assistant",
-            content: finalContent,
-            thinking: finalThinking,
-            model: selectedModel,
-            created_at: assistantCreatedAt,
-          }),
-        },
-      ).catch(() => {});
+      await fetch(`http://127.0.0.1:5000/conversations/${convId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: assistantMsgId,
+          role: "assistant",
+          content: finalContent,
+          thinking: finalThinking,
+          model: selectedModel,
+          created_at: assistantCreatedAt,
+        }),
+      }).catch(() => {});
 
       await fetch(`http://127.0.0.1:5000/conversations/${convId}`, {
         method: "PATCH",
@@ -381,6 +384,13 @@ export default function App() {
 
   return (
     <div className="h-screen flex bg-[#efefef] dark:bg-[#0d0d0d] text-zinc-900 dark:text-zinc-100 overflow-hidden transition-all duration-300 ease-out">
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <Sidebar
         conversations={conversations}
         activeId={activeId}
@@ -394,6 +404,8 @@ export default function App() {
         setTuningOptions={setTuningOptions}
         onOpenCreateModal={() => setShowCreateModal(true)}
         onOpenSearch={() => setShowSearchModal(true)}
+        mobileOpen={sidebarOpen}
+        onMobileClose={() => setSidebarOpen(false)}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -403,11 +415,18 @@ export default function App() {
             className="text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
             title="Open menu"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="w-5 h-5" fill="currentColor">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 640 640"
+              className="w-5 h-5"
+              fill="currentColor"
+            >
               <path d="M96 160C96 142.3 110.3 128 128 128L512 128C529.7 128 544 142.3 544 160C544 177.7 529.7 192 512 192L128 192C110.3 192 96 177.7 96 160zM96 320C96 302.3 110.3 288 128 288L512 288C529.7 288 544 302.3 544 320C544 337.7 529.7 352 512 352L128 352C110.3 352 96 337.7 96 320zM544 480C544 497.7 529.7 512 512 512L128 512C110.3 512 96 497.7 96 480C96 462.3 110.3 448 128 448L512 448C529.7 448 544 462.3 544 480z" />
             </svg>
           </button>
-          <span className="ml-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">LLuMi</span>
+          <span className="ml-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+            LLuMi
+          </span>
         </div>
 
         <ChatPane
@@ -440,7 +459,9 @@ export default function App() {
           }}
           onDeletePersona={async (id) => {
             if (activePersona?.id === id) setActivePersona(null);
-            await fetch(`http://127.0.0.1:5000/custom_models/${id}`, { method: "DELETE" }).catch(() => {});
+            await fetch(`http://127.0.0.1:5000/custom_models/${id}`, {
+              method: "DELETE",
+            }).catch(() => {});
             fetchPersonas();
           }}
         />
