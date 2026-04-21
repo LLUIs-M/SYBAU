@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, ReactNode } from "react";
 import type { Conversation } from "../types";
 
 interface Props {
@@ -15,7 +15,7 @@ interface MessageMatch {
   snippet: string;
 }
 
-function highlightMatch(text: string, query: string): JSX.Element {
+function highlightMatch(text: string, query: string): ReactNode {
   if (!query) return <>{text}</>;
   const idx = text.toLowerCase().indexOf(query.toLowerCase());
   if (idx === -1) return <>{text}</>;

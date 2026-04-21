@@ -17,6 +17,8 @@ interface Props {
   setTuningOptions: (opts: TuningOptions) => void;
   onOpenCreateModal: () => void;
   onOpenSearch: () => void;
+  mobileOpen: boolean;
+  onMobileClose: () => void;
 }
 
 const GROUP_ORDER = ["Today", "Yesterday", "This Week", "Older"];
@@ -34,6 +36,8 @@ export default function Sidebar({
   setTuningOptions,
   onOpenCreateModal,
   onOpenSearch,
+  mobileOpen,
+  onMobileClose,
 }: Props) {
 
   const [showTuning, setShowTuning] = useState(false);

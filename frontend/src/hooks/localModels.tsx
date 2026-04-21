@@ -40,7 +40,11 @@ export function useLocalModels(): UseLocalModelsResult {
   }, []);
 
   useEffect(() => {
-    fetchModels().finally(() => setLoading(false));
+    const init = async () => {
+      await fetchModels();
+      setLoading(false);
+    };
+    init();
   }, [fetchModels]);
 
   return { models, selectedModel, setSelectedModel, loading, refetch: fetchModels };

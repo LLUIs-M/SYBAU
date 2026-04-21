@@ -394,6 +394,8 @@ export default function App() {
         setTuningOptions={setTuningOptions}
         onOpenCreateModal={() => setShowCreateModal(true)}
         onOpenSearch={() => setShowSearchModal(true)}
+        mobileOpen={sidebarOpen}
+        onMobileClose={() => setSidebarOpen(false)}
       />
 
       <div className="flex-1 flex flex-col min-w-0">

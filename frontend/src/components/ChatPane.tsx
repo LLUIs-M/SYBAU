@@ -22,7 +22,7 @@ export default function ChatPane({
   const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  function onLoad(splineApp) {
+  function onLoad(splineApp: any) {
     console.log("Spline cargado:", splineApp);
   }
 
