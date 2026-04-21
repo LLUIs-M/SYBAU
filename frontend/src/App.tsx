@@ -5,6 +5,7 @@ import Composer from "./components/Composer";
 import PullModelModal from "./components/PullModelModal";
 import CreateModelModal from "./components/CreateModelModal";
 import HardwareMonitor from "./components/HardwareMonitor";
+import SearchModal from "./components/SearchModal";
 import type { Conversation, Message, TuningOptions, Persona } from "./types";
 import { nanoid, parseContent } from "./lib/utils";
 import { useLocalModels } from "./hooks/localModels";
@@ -22,6 +23,8 @@ export default function App() {
   const [showThinking, setShowThinking] = useState<boolean>(true);
   const [showPullModal, setShowPullModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSearchModal, setShowSearchModal] = useState(false);
+  const [targetMessageId, setTargetMessageId] = useState<string | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [activePersona, setActivePersona] = useState<Persona | null>(null);
   const [tuningOptions, setTuningOptions] = useState<TuningOptions>({
@@ -86,8 +89,9 @@ export default function App() {
   }, []);
 
   const handleSelect = useCallback(
-    (id: string) => {
+    (id: string, messageId?: string) => {
       setActiveId(id);
+      setTargetMessageId(messageId ?? null);
       loadMessages(id);
     },
     [loadMessages],
@@ -388,6 +392,7 @@ export default function App() {
         tuningOptions={tuningOptions}
         setTuningOptions={setTuningOptions}
         onOpenCreateModal={() => setShowCreateModal(true)}
+        onOpenSearch={() => setShowSearchModal(true)}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -395,6 +400,8 @@ export default function App() {
           conversation={activeConv}
           isStreaming={isStreaming}
           showThinking={showThinking}
+          targetMessageId={targetMessageId}
+          onTargetMessageScrolled={() => setTargetMessageId(null)}
         />
         <Composer
           onSend={handleSend}
@@ -446,6 +453,14 @@ export default function App() {
           />
         )}
       </div>
+
+      {showSearchModal && (
+        <SearchModal
+          conversations={conversations}
+          onClose={() => setShowSearchModal(false)}
+          onSelect={handleSelect}
+        />
+      )}
     </div>
   );
 }
