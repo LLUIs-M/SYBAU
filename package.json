@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev:front": "cd frontend && npm run dev",
+    "dev:front": "cd frontend && npm run dev -- --host",
     "dev:back": "node scripts/dev-backend.js",
     "dev": "concurrently \"npm run dev:back\" \"npm run dev:front\""
   },

@@ -31,6 +31,14 @@
 > - **Pattern**: Define triggers clearly, keep rules compact.
 > - **Frontmatter**: Include name, description, version, allowed-tools.
 
+### go-testing
+- **Trigger**: "writing Go tests", "teatest", "Bubbletea TUI testing", "table-driven tests", "Go coverage".
+- **Compact Rules**:
+> [!NOTE]
+> - **Table-Driven**: Always use table-driven tests for multiple cases.
+> - **TUI**: Use teatest for Bubbletea component testing.
+> - **Golden Files**: Use golden file pattern for complex output assertions.
+
 ## Project Standards (auto-resolved)
 
 - **Monorepo Structure**: Keep `frontend/` and `backend/` decoupled. Communicate via REST/SSE.
