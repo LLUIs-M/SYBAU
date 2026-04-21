@@ -43,7 +43,7 @@ export default function HardwareMonitor() {
   if (runningModels.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-50 flex flex-col gap-2 pointer-events-auto">
+    <div className="fixed bottom-24 left-4 z-50 lg:bottom-4 flex flex-col gap-2 pointer-events-auto">
       {runningModels.map((m, idx) => (
         <div 
           key={idx} 
